@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Core palette */
+  --blood:       #8b0000;
+  --blood-light: #c0392b;
+  --void:        #05020a;
+  --void-2:      #0d0714;
+  --void-3:      #140d1e;
+  --ash:         #1e1528;
+  --ash-2:       #2a1e3a;
+  --mist:        #4a3860;
+  --pale:        #d4c5e8;
+  --pale-dim:    #8b7aa0;
+  --gold:        #c9a84c;
+  --gold-dim:    #7a6330;
+  --cyan-bite:   #00e5ff;
+
+  /* Glows */
+  --glow-blood:  0 0 20px rgba(139, 0, 0, 0.6), 0 0 60px rgba(139, 0, 0, 0.2);
+  --glow-gold:   0 0 15px rgba(201, 168, 76, 0.5), 0 0 40px rgba(201, 168, 76, 0.15);
+  --glow-cyan:   0 0 15px rgba(0, 229, 255, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mist) var(--void-2);
+}
+
+body {
+  background-color: var(--void);
+  color: var(--pale);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,0,0,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(75,0,130,0.1) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+.font-display  { font-family: 'Cinzel Decorative', serif; }
+.font-title    { font-family: 'Cinzel', serif; }
+.font-mono     { font-family: 'Share Tech Mono', monospace; }
+
+/* Blood-red divider line */
+.divider-blood {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blood-light), transparent);
+  margin: 0;
+}
+
+/* Panel/card base */
+.panel {
+  background: linear-gradient(135deg, var(--void-3) 0%, var(--ash) 100%);
+  border: 1px solid var(--ash-2);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Corner ornaments */
+.corner-ornament::before,
+.corner-ornament::after {
+  content: '✦';
+  position: absolute;
+  color: var(--gold-dim);
+  font-size: 10px;
+  opacity: 0.6;
+}
+.corner-ornament::before { top: 6px; left: 8px; }
+.corner-ornament::after  { bottom: 6px; right: 8px; }
+
+/* Glowing button */
+.btn-blood {
+  background: linear-gradient(135deg, #6b0000, #8b0000);
+  border: 1px solid var(--blood-light);
+  color: #ffd0d0;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-blood:hover {
+  box-shadow: var(--glow-blood);
+  border-color: var(--blood-light);
+  background: linear-gradient(135deg, #8b0000, #a00000);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--mist);
+  color: var(--pale-dim);
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.btn-ghost:hover {
+  border-color: var(--pale);
+  color: var(--pale);
+}
+
+/* Input fields */
+.input-dark {
+  background: var(--void-2);
+  border: 1px solid var(--ash-2);
+  color: var(--pale);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 2px;
+  width: 100%;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.input-dark:focus {
+  border-color: var(--blood-light);
+  box-shadow: 0 0 0 1px rgba(139,0,0,0.3);
+}
+
+.input-dark option {
+  background: var(--void-2);
+}
+
+/* Scrolling marquee for header */
+@keyframes marquee {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(-100%); }
+}
+
+.marquee-text {
+  animation: marquee 30s linear infinite;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Event card entrance */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.event-card {
+  animation: fadeSlideIn 0.3s ease forwards;
+}
+
+/* Status badge pulse for live */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Toggle switch */
+.toggle-track {
+  width: 44px;
+  height: 22px;
+  background: var(--ash-2);
+  border-radius: 11px;
+  border: 1px solid var(--mist);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-track.active {
+  background: var(--blood);
+  border-color: var(--blood-light);
+}
+
+.toggle-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--pale-dim);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.toggle-track.active .toggle-thumb {
+  transform: translateX(22px);
+  background: #ffd0d0;
+}

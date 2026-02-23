@@ -1,0 +1,94 @@
+'use client'
+
+import { signOut } from '@/lib/actions'
+import type { Profile } from '@/lib/types'
+
+interface HeaderProps {
+  profile: Profile | null
+  onLoginClick: () => void
+}
+
+const CLAN_ROLES: Record<string, string> = {
+  Sovereign: '♛',
+  Priest:    '✝',
+  Trainer:   '⚔',
+  Member:    '◈',
+}
+
+export default function Header({ profile, onLoginClick }: HeaderProps) {
+  return (
+    <header className="relative z-20 border-b border-[var(--ash-2)]">
+      {/* Top ticker */}
+      <div className="overflow-hidden bg-[var(--blood)] py-1 border-b border-[var(--blood-light)]">
+        <p className="font-mono text-[10px] text-red-200 tracking-widest">
+          <span className="marquee-text">
+            ✦&nbsp;&nbsp;RENAISSANCE VAN WITHELMIND &nbsp;•&nbsp; PROGENY &nbsp;•&nbsp;
+            CRIMSON UPLINK ACTIVE &nbsp;•&nbsp; ALL INITIATES REPORT TO YOUR SIRE &nbsp;•&nbsp;
+            THE NIGHT IS ETERNAL &nbsp;•&nbsp; ✦&nbsp;&nbsp;RENAISSANCE VAN WITHELMIND &nbsp;•&nbsp;
+            PROGENY &nbsp;•&nbsp; CRIMSON UPLINK ACTIVE &nbsp;•&nbsp;
+            ALL INITIATES REPORT TO YOUR SIRE &nbsp;•&nbsp; THE NIGHT IS ETERNAL &nbsp;•&nbsp;
+          </span>
+        </p>
+      </div>
+
+      {/* Main header bar */}
+      <div
+        className="panel flex items-center justify-between px-6 py-4"
+        style={{ borderRadius: 0, border: 'none' }}
+      >
+        {/* Left ornament */}
+        <div className="hidden md:flex items-center gap-3 text-[var(--gold-dim)] font-mono text-xs tracking-[0.3em] uppercase select-none">
+          <span className="text-[var(--blood-light)] text-lg">⸸</span>
+          <span>Est. in the Dark</span>
+        </div>
+
+        {/* Center — clan name */}
+        <div className="text-center flex-1">
+          <h1
+            className="font-display text-xl md:text-3xl tracking-widest uppercase select-none"
+            style={{
+              color: 'var(--pale)',
+              textShadow: 'var(--glow-blood)',
+              letterSpacing: '0.15em',
+            }}
+          >
+            Renaissance Van Withelmind
+          </h1>
+          <p
+            className="font-title text-[10px] md:text-xs tracking-[0.5em] uppercase mt-0.5"
+            style={{ color: 'var(--gold)', opacity: 0.8 }}
+          >
+            Progeny &nbsp;✦&nbsp; Clan Calendar
+          </p>
+        </div>
+
+        {/* Right — auth */}
+        <div className="hidden md:flex items-center gap-3">
+          {profile ? (
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="font-title text-xs text-[var(--pale)] tracking-wide">
+                  {CLAN_ROLES[profile.role] ?? '◈'}&nbsp; {profile.username}
+                </p>
+                <p className="font-mono text-[10px] text-[var(--pale-dim)] tracking-widest uppercase">
+                  {profile.role}{profile.is_admin ? ' · Admin' : ''}
+                </p>
+              </div>
+              <form action={signOut}>
+                <button type="submit" className="btn-ghost text-[10px] py-1 px-3">
+                  Sign Out
+                </button>
+              </form>
+            </div>
+          ) : (
+            <button onClick={onLoginClick} className="btn-blood">
+              Staff Login
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="divider-blood" />
+    </header>
+  )
+}
