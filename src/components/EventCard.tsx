@@ -27,13 +27,11 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
 
   const catStyle    = CATEGORY_STYLES[event.category]
   const statusStyle = STATUS_STYLES[event.status]
-
-  const isCreator = profile && profile.id === event.created_by
-  const isAdmin   = profile?.is_admin
+  const isCreator   = profile && profile.id === event.created_by
+  const isAdmin     = profile?.is_admin
 
   async function handleStatusChange(newStatus: EventStatus) {
-    setLoading(true)
-    setErr('')
+    setLoading(true); setErr('')
     const res = await updateEventStatus(event.id, newStatus)
     if (res?.error) setErr(res.error)
     setLoading(false)
@@ -53,17 +51,12 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
         style={{ animationDelay: `${index * 40}ms`, borderColor: 'var(--ash-2)' }}
       >
         <div className="p-5 space-y-4">
-
-          {/* Category badge + Status badge */}
+          {/* Badges */}
           <div className="flex items-center justify-between gap-2">
-            <span
-              className={`font-title text-xs tracking-widest uppercase border px-3 py-1 rounded-sm font-bold ${catStyle.badge}`}
-            >
+            <span className={`font-title text-xs tracking-widest uppercase border px-3 py-1 rounded-sm font-bold ${catStyle.badge}`}>
               {CATEGORY_ICONS[event.category]} {event.category}
             </span>
-            <span
-              className={`font-title text-xs tracking-widest uppercase border px-3 py-1 rounded-sm font-bold ${statusStyle}`}
-            >
+            <span className={`font-title text-xs tracking-widest uppercase border px-3 py-1 rounded-sm font-bold ${statusStyle}`}>
               {event.status}
             </span>
           </div>
@@ -81,73 +74,62 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
           )}
 
           {/* Time */}
-          <div
-            className="font-title text-sm font-bold tracking-wide"
-            style={{ color: 'var(--gold)', textShadow: '0 0 8px rgba(201,168,76,0.4)' }}
-          >
+          <div className="font-title text-sm font-bold tracking-wide" style={{ color: 'var(--gold)', textShadow: '0 0 8px rgba(201,168,76,0.4)' }}>
             🕐 {formatEventTime(event.start_time, tzMode)} ({formatTimeLabel(tzMode)})
           </div>
 
+          {/* Location */}
+          {event.location && (
+            <a
+              href={event.location}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs block"
+              style={{ color: '#00e5ff', textDecoration: 'none' }}
+            >
+              📍 Teleport to Location ↗
+            </a>
+          )}
+
           <div className="divider-blood opacity-40" />
 
-          {/* Footer: creator info + controls */}
+          {/* Footer */}
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <p className="font-title text-sm text-[var(--pale-dim)] tracking-wide">
               {event.author_username ?? '—'}
-              {event.author_role && (
-                <span className="ml-2 font-mono text-xs opacity-60">· {event.author_role}</span>
-              )}
+              {event.author_role && <span className="ml-2 font-mono text-xs opacity-60">· {event.author_role}</span>}
             </p>
 
             <div className="flex items-center gap-2">
-              {/* Status dropdown — creator or admin */}
               {(isCreator || isAdmin) && (
-                <select
-                  className="input-dark text-xs py-1 px-2 w-auto"
-                  value={event.status}
-                  disabled={loading}
-                  onChange={(e) => handleStatusChange(e.target.value as EventStatus)}
-                >
+                <select className="input-dark text-xs py-1 px-2 w-auto" value={event.status} disabled={loading}
+                  onChange={(e) => handleStatusChange(e.target.value as EventStatus)}>
                   {EVENT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               )}
-
-              {/* Edit — creator only */}
               {isCreator && (
                 <button
                   className="font-title text-xs border px-2 py-1 rounded-sm transition-colors"
                   style={{ color: 'var(--gold)', borderColor: 'var(--gold-dim)' }}
-                  onClick={() => setShowEdit(true)}
-                  disabled={loading}
-                  title="Edit event"
+                  onClick={() => setShowEdit(true)} disabled={loading}
                 >
                   ✏️ Edit
                 </button>
               )}
-
-              {/* Delete — admin only */}
               {isAdmin && (
-                <button
-                  className="font-mono text-sm text-red-700 hover:text-red-400 transition-colors px-1"
-                  onClick={handleDelete}
-                  disabled={loading}
-                  title="Delete event"
-                >
+                <button className="font-mono text-sm text-red-700 hover:text-red-400 transition-colors px-1"
+                  onClick={handleDelete} disabled={loading} title="Delete event">
                   ✕
                 </button>
               )}
             </div>
           </div>
 
-          {err && (
-            <p className="font-mono text-xs text-red-400">{err}</p>
-          )}
+          {err && <p className="font-mono text-xs text-red-400">{err}</p>}
         </div>
       </article>
 
-      {showEdit && (
-        <EditEventModal event={event} onClose={() => setShowEdit(false)} />
-      )}
+      {showEdit && <EditEventModal event={event} onClose={() => setShowEdit(false)} />}
     </>
   )
 }

@@ -5,10 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { sendDiscordNotification } from '@/lib/discord'
 import type { EventCategory, EventStatus } from '@/lib/types'
 
-// ── CREATE EVENT ─────────────────────────────────────────────
 export async function createEvent(formData: {
   title: string
   description: string
+  location: string
   start_time: string
   category: EventCategory
   status: EventStatus
@@ -17,52 +17,37 @@ export async function createEvent(formData: {
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return { error: 'Not authenticated' }
 
-  const { data: profile } = await supabase
-    .from('profiles').select('username').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single()
 
   const { data: event, error } = await supabase
-    .from('events')
-    .insert({ ...formData, created_by: user.id })
-    .select().single()
+    .from('events').insert({ ...formData, created_by: user.id }).select().single()
 
   if (error) return { error: error.message }
 
   await sendDiscordNotification({
-    eventTitle:     event.title,
-    category:       event.category,
-    action:         'created',
-    currentStatus:  event.status,
-    authorUsername: profile?.username ?? 'Unknown',
-    startTime:      event.start_time,
+    eventTitle: event.title, category: event.category,
+    action: 'created', currentStatus: event.status,
+    authorUsername: profile?.username ?? 'Unknown', startTime: event.start_time,
   })
 
   revalidatePath('/')
   return { data: event }
 }
 
-// ── UPDATE STATUS ────────────────────────────────────────────
 export async function updateEventStatus(eventId: string, newStatus: EventStatus) {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return { error: 'Not authenticated' }
 
-  const { data: existing } = await supabase
-    .from('events_with_author').select('*').eq('id', eventId).single()
-
-  const { data: event, error } = await supabase
-    .from('events').update({ status: newStatus }).eq('id', eventId).select().single()
-
+  const { data: existing } = await supabase.from('events_with_author').select('*').eq('id', eventId).single()
+  const { data: event, error } = await supabase.from('events').update({ status: newStatus }).eq('id', eventId).select().single()
   if (error) return { error: error.message }
 
   if (existing) {
     await sendDiscordNotification({
-      eventTitle:     existing.title,
-      category:       existing.category,
-      action:         'status_changed',
-      currentStatus:  existing.status,
-      newStatus,
-      authorUsername: existing.author_username ?? 'Unknown',
-      startTime:      existing.start_time,
+      eventTitle: existing.title, category: existing.category,
+      action: 'status_changed', currentStatus: existing.status, newStatus,
+      authorUsername: existing.author_username ?? 'Unknown', startTime: existing.start_time,
     })
   }
 
@@ -70,31 +55,21 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
   return { data: event }
 }
 
-// ── UPDATE EVENT ─────────────────────────────────────────────
-export async function updateEvent(
-  eventId: string,
-  formData: {
-    title?: string
-    description?: string
-    start_time?: string
-    category?: EventCategory
-    status?: EventStatus
-  }
-) {
+export async function updateEvent(eventId: string, formData: {
+  title?: string; description?: string; location?: string
+  start_time?: string; category?: EventCategory; status?: EventStatus
+}) {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return { error: 'Not authenticated' }
 
-  const { data: event, error } = await supabase
-    .from('events').update(formData).eq('id', eventId).select().single()
-
+  const { data: event, error } = await supabase.from('events').update(formData).eq('id', eventId).select().single()
   if (error) return { error: error.message }
 
   revalidatePath('/')
   return { data: event }
 }
 
-// ── DELETE EVENT ─────────────────────────────────────────────
 export async function deleteEvent(eventId: string) {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
@@ -107,16 +82,13 @@ export async function deleteEvent(eventId: string) {
   return { success: true }
 }
 
-// ── FETCH ALL EVENTS ─────────────────────────────────────────
 export async function getEvents() {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('events_with_author').select('*').order('start_time', { ascending: true })
+  const { data, error } = await supabase.from('events_with_author').select('*').order('start_time', { ascending: true })
   if (error) return { error: error.message }
   return { data }
 }
 
-// ── AUTH ─────────────────────────────────────────────────────
 export async function signInWithEmail(email: string, password: string) {
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
