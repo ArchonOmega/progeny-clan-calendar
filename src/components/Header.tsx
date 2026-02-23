@@ -9,12 +9,12 @@ interface HeaderProps {
 }
 
 const CLAN_ROLES: Record<string, string> = {
-  Sovereign:    '♛',
-  Priest:       '✝',
-  Trainer:      '⚔',
-  Member:       '◈',
+  Sovereign:     '♛',
+  Priest:        '✝',
+  Trainer:       '⚔',
+  Member:        '◈',
   'Queens Hand': '♚',
-  Liaison:      '⚜',
+  Liaison:       '⚜',
 }
 
 export default function Header({ profile, onLoginClick }: HeaderProps) {
@@ -39,23 +39,27 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
 
       {/* ── Main header bar ────────────────────────────── */}
       <div
-        className="panel grid px-6 py-5"
+        className="panel grid py-5"
         style={{
           borderRadius: 0,
           border: 'none',
           gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center',
+          paddingLeft: '2.5rem',
+          paddingRight: '2.5rem',
         }}
       >
-        {/* Col 1 — logged-in user info (left side) */}
-        <div className="flex items-center gap-2">
+        {/* Col 1 — logged-in user info, indented from left */}
+        <div style={{ paddingLeft: '0.75rem' }}>
           {profile && (
             <div>
               <p className="font-title text-sm text-[var(--pale)] tracking-wide">
                 {CLAN_ROLES[profile.role] ?? '◈'}&nbsp;{profile.username}
               </p>
-              <p className="font-mono text-[10px] text-[var(--gold)] tracking-widest uppercase"
-                style={{ textShadow: '0 0 8px rgba(201,168,76,0.5)' }}>
+              <p
+                className="font-mono text-[11px] tracking-widest uppercase"
+                style={{ color: 'var(--gold)', textShadow: '0 0 8px rgba(201,168,76,0.5)' }}
+              >
                 {profile.role}{profile.is_admin ? ' · Admin' : ''}
               </p>
             </div>
@@ -85,11 +89,11 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
           </p>
         </div>
 
-        {/* Col 3 — login/logout (right side) */}
-        <div className="flex items-center justify-end gap-3">
+        {/* Col 3 — auth button, indented from right */}
+        <div style={{ paddingRight: '0.75rem', display: 'flex', justifyContent: 'flex-end' }}>
           {profile ? (
             <form action={signOut}>
-              <button type="submit" className="btn-ghost text-[10px] py-1 px-3">
+              <button type="submit" className="btn-ghost text-[11px] py-1.5 px-4">
                 Sign Out
               </button>
             </form>

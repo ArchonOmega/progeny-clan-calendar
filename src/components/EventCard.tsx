@@ -21,14 +21,13 @@ const CATEGORY_ICONS: Record<string, string> = {
 }
 
 export default function EventCard({ event, profile, tzMode, index }: EventCardProps) {
-  const [loading, setLoading]     = useState(false)
-  const [err, setErr]             = useState('')
-  const [showEdit, setShowEdit]   = useState(false)
+  const [loading, setLoading]   = useState(false)
+  const [err, setErr]           = useState('')
+  const [showEdit, setShowEdit] = useState(false)
 
   const catStyle    = CATEGORY_STYLES[event.category]
   const statusStyle = STATUS_STYLES[event.status]
 
-  // Only the creator can edit; admins can delete
   const isCreator = profile && profile.id === event.created_by
   const isAdmin   = profile?.is_admin
 
@@ -53,49 +52,58 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
         className="event-card panel group hover:border-[var(--mist)] transition-all duration-200"
         style={{ animationDelay: `${index * 40}ms`, borderColor: 'var(--ash-2)' }}
       >
-        <div className="p-4 space-y-3">
+        <div className="p-5 space-y-4">
 
-          {/* Top row: category badge + status */}
-          <div className="flex items-start justify-between gap-2">
-            <span className={`font-mono text-[10px] tracking-widest uppercase border px-2 py-0.5 rounded-sm ${catStyle.badge}`}>
+          {/* Category badge + Status badge */}
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`font-title text-xs tracking-widest uppercase border px-3 py-1 rounded-sm font-bold ${catStyle.badge}`}
+            >
               {CATEGORY_ICONS[event.category]} {event.category}
             </span>
-            <span className={`font-mono text-[10px] tracking-widest uppercase border px-2 py-0.5 rounded-sm ${statusStyle}`}>
+            <span
+              className={`font-title text-xs tracking-widest uppercase border px-3 py-1 rounded-sm font-bold ${statusStyle}`}
+            >
               {event.status}
             </span>
           </div>
 
           {/* Title */}
-          <h3 className="font-title text-base text-[var(--pale)] leading-tight tracking-wide group-hover:text-white transition-colors">
+          <h3 className="font-title text-xl text-[var(--pale)] leading-snug tracking-wide group-hover:text-white transition-colors">
             {event.title}
           </h3>
 
           {/* Description */}
           {event.description && (
-            <p className="font-mono text-xs text-[var(--pale-dim)] leading-relaxed line-clamp-3">
+            <p className="font-mono text-sm text-[var(--pale-dim)] leading-relaxed line-clamp-3">
               {event.description}
             </p>
           )}
 
           {/* Time */}
-          <div className="font-mono text-[11px] text-[var(--gold)] tracking-wide">
+          <div
+            className="font-title text-sm font-bold tracking-wide"
+            style={{ color: 'var(--gold)', textShadow: '0 0 8px rgba(201,168,76,0.4)' }}
+          >
             🕐 {formatEventTime(event.start_time, tzMode)} ({formatTimeLabel(tzMode)})
           </div>
 
           <div className="divider-blood opacity-40" />
 
-          {/* Footer */}
+          {/* Footer: creator info + controls */}
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <p className="font-mono text-[10px] text-[var(--pale-dim)] tracking-wide">
+            <p className="font-title text-sm text-[var(--pale-dim)] tracking-wide">
               {event.author_username ?? '—'}
-              {event.author_role && <span className="ml-1 opacity-60">· {event.author_role}</span>}
+              {event.author_role && (
+                <span className="ml-2 font-mono text-xs opacity-60">· {event.author_role}</span>
+              )}
             </p>
 
             <div className="flex items-center gap-2">
               {/* Status dropdown — creator or admin */}
               {(isCreator || isAdmin) && (
                 <select
-                  className="input-dark text-[10px] py-0.5 px-2 w-auto"
+                  className="input-dark text-xs py-1 px-2 w-auto"
                   value={event.status}
                   disabled={loading}
                   onChange={(e) => handleStatusChange(e.target.value as EventStatus)}
@@ -104,10 +112,11 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
                 </select>
               )}
 
-              {/* Edit button — creator only */}
+              {/* Edit — creator only */}
               {isCreator && (
                 <button
-                  className="font-mono text-[10px] text-[var(--gold)] hover:text-yellow-300 transition-colors border border-[var(--gold-dim)] px-2 py-0.5 rounded-sm"
+                  className="font-title text-xs border px-2 py-1 rounded-sm transition-colors"
+                  style={{ color: 'var(--gold)', borderColor: 'var(--gold-dim)' }}
                   onClick={() => setShowEdit(true)}
                   disabled={loading}
                   title="Edit event"
@@ -119,7 +128,7 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
               {/* Delete — admin only */}
               {isAdmin && (
                 <button
-                  className="font-mono text-[10px] text-red-700 hover:text-red-400 transition-colors"
+                  className="font-mono text-sm text-red-700 hover:text-red-400 transition-colors px-1"
                   onClick={handleDelete}
                   disabled={loading}
                   title="Delete event"
@@ -130,7 +139,9 @@ export default function EventCard({ event, profile, tzMode, index }: EventCardPr
             </div>
           </div>
 
-          {err && <p className="font-mono text-[10px] text-red-400">{err}</p>}
+          {err && (
+            <p className="font-mono text-xs text-red-400">{err}</p>
+          )}
         </div>
       </article>
 
