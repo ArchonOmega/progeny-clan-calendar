@@ -28,10 +28,9 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
   const today = new Date()
   const [viewYear,  setViewYear]  = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
-  const [selected,  setSelected]  = useState<number | null>(null)   // selected day number
+  const [selected,  setSelected]  = useState<number | null>(null)
   const [hovered,   setHovered]   = useState<number | null>(null)
 
-  // Build a map: day-of-month → events[]
   const eventsByDay = useMemo(() => {
     const map: Record<number, ClanEvent[]> = {}
     events.forEach((e) => {
@@ -46,20 +45,20 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
 
   const selectedEvents = selected ? (eventsByDay[selected] ?? []) : []
 
-  // Calendar grid
-  const firstDay    = new Date(viewYear, viewMonth, 1).getDay()  // 0=Sun
+  const firstDay    = new Date(viewYear, viewMonth, 1).getDay()
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const cells: (number | null)[] = [
     ...Array(firstDay).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ]
-  // Pad to full weeks
   while (cells.length % 7 !== 0) cells.push(null)
 
+  // Figure out which row each cell is in (0-indexed) so we can flip tooltip
+  const totalRows = cells.length / 7
+  const getCellRow = (cellIndex: number) => Math.floor(cellIndex / 7)
+
   const isToday = (day: number) =>
-    day === today.getDate() &&
-    viewMonth === today.getMonth() &&
-    viewYear === today.getFullYear()
+    day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear()
 
   function prevMonth() {
     if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11) }
@@ -75,7 +74,7 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
   return (
     <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
 
-      {/* ── Calendar grid ─────────────────────────────── */}
+      {/* ── Calendar grid ──────────────────────────────────── */}
       <div style={{
         flex: selected ? '0 0 auto' : '1',
         width: selected ? 'min(580px, 60%)' : '100%',
@@ -83,54 +82,28 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
         background: 'linear-gradient(135deg, #140d1e, #1e1528)',
         border: '1px solid #2a1e3a',
         borderRadius: '4px',
-        overflow: 'hidden',
+        overflow: 'visible',   // allow tooltips to escape
       }}>
 
         {/* Month nav */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 20px',
-          borderBottom: '1px solid #2a1e3a',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px 20px', borderBottom: '1px solid #2a1e3a',
           background: 'rgba(139,0,0,0.08)',
+          borderRadius: '4px 4px 0 0',
         }}>
-          <button
-            onClick={prevMonth}
-            style={{ background: 'none', border: '1px solid #4a3860', color: '#8b7aa0', padding: '4px 12px', cursor: 'pointer', borderRadius: '2px', fontFamily: "'Share Tech Mono', monospace", fontSize: '14px' }}
-          >
-            ‹
-          </button>
-
+          <button onClick={prevMonth} style={{ background: 'none', border: '1px solid #4a3860', color: '#8b7aa0', padding: '4px 12px', cursor: 'pointer', borderRadius: '2px', fontFamily: "'Share Tech Mono', monospace", fontSize: '14px' }}>‹</button>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontFamily: "'Cinzel Decorative', serif", fontSize: '16px', color: '#d4c5e8', letterSpacing: '0.1em', margin: 0 }}>
-              {MONTHS[viewMonth]}
-            </p>
-            <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '11px', color: '#c9a84c', letterSpacing: '0.3em', marginTop: '2px' }}>
-              {viewYear}
-            </p>
+            <p style={{ fontFamily: "'Cinzel Decorative', serif", fontSize: '16px', color: '#d4c5e8', letterSpacing: '0.1em', margin: 0 }}>{MONTHS[viewMonth]}</p>
+            <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '11px', color: '#c9a84c', letterSpacing: '0.3em', marginTop: '2px' }}>{viewYear}</p>
           </div>
-
-          <button
-            onClick={nextMonth}
-            style={{ background: 'none', border: '1px solid #4a3860', color: '#8b7aa0', padding: '4px 12px', cursor: 'pointer', borderRadius: '2px', fontFamily: "'Share Tech Mono', monospace", fontSize: '14px' }}
-          >
-            ›
-          </button>
+          <button onClick={nextMonth} style={{ background: 'none', border: '1px solid #4a3860', color: '#8b7aa0', padding: '4px 12px', cursor: 'pointer', borderRadius: '2px', fontFamily: "'Share Tech Mono', monospace", fontSize: '14px' }}>›</button>
         </div>
 
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid #2a1e3a' }}>
           {DAYS.map((d) => (
-            <div key={d} style={{
-              padding: '8px 4px',
-              textAlign: 'center',
-              fontFamily: "'Cinzel', serif",
-              fontSize: '11px',
-              letterSpacing: '0.15em',
-              color: '#4a3860',
-              textTransform: 'uppercase',
-            }}>
+            <div key={d} style={{ padding: '8px 4px', textAlign: 'center', fontFamily: "'Cinzel', serif", fontSize: '11px', letterSpacing: '0.15em', color: '#4a3860', textTransform: 'uppercase' }}>
               {d}
             </div>
           ))}
@@ -139,16 +112,21 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
         {/* Day cells */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
           {cells.map((day, i) => {
-            if (!day) return <div key={`empty-${i}`} style={{ minHeight: '72px', borderRight: '1px solid #1e1528', borderBottom: '1px solid #1e1528' }} />
+            if (!day) return (
+              <div key={`empty-${i}`} style={{ minHeight: '80px', borderRight: '1px solid #1e1528', borderBottom: '1px solid #1e1528' }} />
+            )
 
             const dayEvents  = eventsByDay[day] ?? []
             const hasEvents  = dayEvents.length > 0
             const isTodayDay = isToday(day)
             const isSelected = selected === day
             const isHovered  = hovered === day
+            const cellRow    = getCellRow(i)
+            // Flip tooltip upward if in the last 2 rows
+            const tooltipAbove = cellRow >= totalRows - 2
 
             let bg = 'transparent'
-            if (isSelected)  bg = 'rgba(201,168,76,0.12)'
+            if (isSelected)             bg = 'rgba(201,168,76,0.12)'
             else if (isHovered && hasEvents) bg = 'rgba(201,168,76,0.06)'
 
             return (
@@ -158,7 +136,7 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
                 onMouseEnter={() => setHovered(day)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
-                  minHeight: '72px',
+                  minHeight: '80px',
                   padding: '6px',
                   borderRight: '1px solid #1e1528',
                   borderBottom: '1px solid #1e1528',
@@ -170,14 +148,9 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
               >
                 {/* Day number */}
                 <div style={{
-                  width: '26px',
-                  height: '26px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: "'Cinzel', serif",
-                  fontSize: '12px',
+                  width: '26px', height: '26px', borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: "'Cinzel', serif", fontSize: '12px',
                   fontWeight: isTodayDay ? 'bold' : 'normal',
                   background: isTodayDay ? '#8b0000' : 'transparent',
                   color: isTodayDay ? '#ffd0d0' : isSelected ? '#c9a84c' : '#8b7aa0',
@@ -186,25 +159,16 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
                   {day}
                 </div>
 
-                {/* Event dots */}
+                {/* Event pills */}
                 {hasEvents && (
                   <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     {dayEvents.slice(0, 3).map((e) => (
-                      <div
-                        key={e.id}
-                        style={{
-                          fontSize: '10px',
-                          fontFamily: "'Share Tech Mono', monospace",
-                          color: '#c9a84c',
-                          background: 'rgba(201,168,76,0.1)',
-                          border: '1px solid rgba(201,168,76,0.3)',
-                          borderRadius: '2px',
-                          padding: '1px 4px',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
+                      <div key={e.id} style={{
+                        fontSize: '10px', fontFamily: "'Share Tech Mono', monospace",
+                        color: '#c9a84c', background: 'rgba(201,168,76,0.1)',
+                        border: '1px solid rgba(201,168,76,0.3)', borderRadius: '2px',
+                        padding: '1px 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
                         {CATEGORY_ICONS[e.category]} {e.title}
                       </div>
                     ))}
@@ -216,14 +180,17 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
                   </div>
                 )}
 
-                {/* Hover tooltip */}
+                {/* Hover tooltip — flips above if near bottom */}
                 {isHovered && hasEvents && !isSelected && (
                   <div style={{
                     position: 'absolute',
-                    top: '100%',
+                    // If near bottom rows, show above; otherwise show below
+                    ...(tooltipAbove
+                      ? { bottom: '100%', marginBottom: '6px' }
+                      : { top: '100%',    marginTop: '6px'    }),
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    zIndex: 100,
+                    zIndex: 200,
                     background: '#0d0714',
                     border: '1px solid #c9a84c',
                     borderRadius: '4px',
@@ -235,9 +202,7 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
                   }}>
                     {dayEvents.map((e) => (
                       <div key={e.id} style={{ marginBottom: '6px' }}>
-                        <p style={{ fontFamily: "'Cinzel', serif", fontSize: '12px', color: '#d4c5e8', margin: '0 0 2px 0' }}>
-                          {e.title}
-                        </p>
+                        <p style={{ fontFamily: "'Cinzel', serif", fontSize: '12px', color: '#d4c5e8', margin: '0 0 2px 0' }}>{e.title}</p>
                         <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '10px', color: '#c9a84c', margin: 0 }}>
                           🕐 {formatEventTime(e.start_time, tzMode)}
                         </p>
@@ -254,13 +219,7 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
         </div>
 
         {/* Legend */}
-        <div style={{
-          padding: '12px 20px',
-          borderTop: '1px solid #2a1e3a',
-          display: 'flex',
-          gap: '20px',
-          alignItems: 'center',
-        }}>
+        <div style={{ padding: '12px 20px', borderTop: '1px solid #2a1e3a', display: 'flex', gap: '20px', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#8b0000', boxShadow: '0 0 6px rgba(139,0,0,0.6)' }} />
             <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '10px', color: '#8b7aa0' }}>Today</span>
@@ -272,23 +231,16 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
         </div>
       </div>
 
-      {/* ── Selected day panel ────────────────────────── */}
+      {/* ── Selected day panel ─────────────────────────────── */}
       {selected && selectedEvents.length > 0 && (
         <div style={{
-          flex: '1',
-          background: 'linear-gradient(135deg, #140d1e, #1e1528)',
-          border: '1px solid #c9a84c',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          minWidth: '280px',
+          flex: '1', background: 'linear-gradient(135deg, #140d1e, #1e1528)',
+          border: '1px solid #c9a84c', borderRadius: '4px',
+          overflow: 'hidden', minWidth: '280px',
         }}>
-          {/* Panel header */}
           <div style={{
-            padding: '14px 18px',
-            borderBottom: '1px solid #2a1e3a',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            padding: '14px 18px', borderBottom: '1px solid #2a1e3a',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             background: 'rgba(201,168,76,0.06)',
           }}>
             <div>
@@ -299,95 +251,35 @@ export default function CalendarView({ events, tzMode }: CalendarViewProps) {
                 {selectedEvents.length} event{selectedEvents.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <button
-              onClick={() => setSelected(null)}
-              style={{ background: 'none', border: 'none', color: '#8b7aa0', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
-            >
-              ✕
-            </button>
+            <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: '#8b7aa0', fontSize: '16px', cursor: 'pointer', padding: '4px' }}>✕</button>
           </div>
 
-          {/* Event list */}
           <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {selectedEvents.map((e) => {
               const catStyle = CATEGORY_STYLES[e.category]
               return (
-                <div key={e.id} style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid #2a1e3a',
-                  borderRadius: '3px',
-                  padding: '12px',
-                }}>
-                  {/* Category + Status */}
+                <div key={e.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #2a1e3a', borderRadius: '3px', padding: '12px' }}>
                   <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                    <span style={{
-                      fontFamily: "'Cinzel', serif",
-                      fontSize: '10px',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      padding: '2px 8px',
-                      borderRadius: '2px',
-                      border: '1px solid',
-                      fontWeight: 'bold',
-                    }}
-                      className={catStyle.badge}
-                    >
+                    <span style={{ fontFamily: "'Cinzel', serif", fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '2px', border: '1px solid', fontWeight: 'bold' }} className={catStyle.badge}>
                       {CATEGORY_ICONS[e.category]} {e.category}
                     </span>
-                    <span style={{
-                      fontFamily: "'Share Tech Mono', monospace",
-                      fontSize: '10px',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      padding: '2px 8px',
-                      borderRadius: '2px',
-                      border: '1px solid',
-                      color: '#94a3b8',
-                      borderColor: '#475569',
-                    }}>
+                    <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '2px', border: '1px solid', color: '#94a3b8', borderColor: '#475569' }}>
                       {e.status}
                     </span>
                   </div>
-
-                  {/* Title */}
-                  <p style={{ fontFamily: "'Cinzel', serif", fontSize: '15px', color: '#d4c5e8', margin: '0 0 6px', lineHeight: 1.3 }}>
-                    {e.title}
-                  </p>
-
-                  {/* Description */}
+                  <p style={{ fontFamily: "'Cinzel', serif", fontSize: '15px', color: '#d4c5e8', margin: '0 0 6px', lineHeight: 1.3 }}>{e.title}</p>
                   {e.description && (
-                    <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '11px', color: '#8b7aa0', margin: '0 0 8px', lineHeight: 1.6 }}>
-                      {e.description}
-                    </p>
+                    <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '11px', color: '#8b7aa0', margin: '0 0 8px', lineHeight: 1.6 }}>{e.description}</p>
                   )}
-
-                  {/* Time */}
                   <p style={{ fontFamily: "'Cinzel', serif", fontSize: '12px', color: '#c9a84c', margin: '0 0 4px', fontWeight: 'bold' }}>
                     🕐 {formatEventTime(e.start_time, tzMode)}
                   </p>
-
-                  {/* Location */}
                   {e.location && (
-                    <a
-                      href={e.location}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontFamily: "'Share Tech Mono', monospace",
-                        fontSize: '11px',
-                        color: '#00e5ff',
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        marginTop: '6px',
-                      }}
-                    >
+                    <a href={e.location} target="_blank" rel="noopener noreferrer"
+                      style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '11px', color: '#00e5ff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
                       📍 Teleport to Location ↗
                     </a>
                   )}
-
-                  {/* Creator */}
                   <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '10px', color: '#4a3860', margin: '8px 0 0' }}>
                     Posted by {e.author_username} · {e.author_role}
                   </p>
