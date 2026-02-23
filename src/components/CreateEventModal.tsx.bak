@@ -31,7 +31,10 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
     }
     setLoading(true)
     setErr('')
+
+    // Convert local datetime-local value to UTC ISO
     const utcIso = new Date(form.start_time).toISOString()
+
     const res = await createEvent({ ...form, start_time: utcIso })
     if (res?.error) {
       setErr(res.error)
@@ -48,16 +51,12 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
       style={{ background: 'rgba(5,2,10,0.85)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      {/* Modal — fixed max-height with internal scroll so nothing is cut off */}
       <div
-        className="panel w-full max-w-lg flex flex-col"
-        style={{
-          border: '1px solid var(--blood)',
-          maxHeight: '90vh',
-        }}
+        className="panel corner-ornament w-full max-w-lg"
+        style={{ border: '1px solid var(--blood)' }}
       >
-        {/* Header — fixed */}
-        <div className="px-6 pt-5 pb-4 border-b border-[var(--ash-2)] flex items-center justify-between shrink-0">
+        {/* Header */}
+        <div className="px-6 pt-5 pb-4 border-b border-[var(--ash-2)] flex items-center justify-between">
           <div>
             <h2 className="font-display text-sm tracking-widest uppercase text-[var(--pale)]">
               ✦ New Event
@@ -74,8 +73,8 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
           </button>
         </div>
 
-        {/* Body — scrollable */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-4">
+        {/* Form */}
+        <div className="p-6 space-y-4">
           <div>
             <label className="font-mono text-[10px] tracking-widest uppercase text-[var(--pale-dim)] block mb-1.5">
               Event Title *
@@ -153,20 +152,19 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
               {err}
             </p>
           )}
-        </div>
 
-        {/* Footer — fixed, always visible */}
-        <div className="px-6 py-4 border-t border-[var(--ash-2)] flex items-center gap-3 shrink-0">
-          <button
-            className="btn-blood flex-1"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? 'Summoning…' : '🩸 Create Event'}
-          </button>
-          <button className="btn-ghost" onClick={onClose} disabled={loading}>
-            Cancel
-          </button>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              className="btn-blood flex-1"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? 'Summoning…' : '🩸 Create Event'}
+            </button>
+            <button className="btn-ghost" onClick={onClose} disabled={loading}>
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>

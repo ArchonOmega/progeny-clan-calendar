@@ -9,18 +9,23 @@ interface HeaderProps {
 }
 
 const CLAN_ROLES: Record<string, string> = {
-  Sovereign: '♛',
-  Priest:    '✝',
-  Trainer:   '⚔',
-  Member:    '◈',
+  Sovereign:    '♛',
+  Priest:       '✝',
+  Trainer:      '⚔',
+  Member:       '◈',
+  'Queens Hand': '♚',
 }
 
 export default function Header({ profile, onLoginClick }: HeaderProps) {
   return (
     <header className="relative z-20 border-b border-[var(--ash-2)]">
-      {/* Top ticker */}
-      <div className="overflow-hidden bg-[var(--blood)] py-1 border-b border-[var(--blood-light)]">
-        <p className="font-mono text-[10px] text-red-200 tracking-widest">
+
+      {/* ── Top ticker ─────────────────────────────────── */}
+      <div className="overflow-hidden bg-[var(--blood)] py-2 border-b border-[var(--blood-light)]">
+        <p
+          className="font-title text-sm text-red-100 tracking-[0.25em] font-bold"
+          style={{ textShadow: '0 0 8px rgba(255,150,150,0.5)' }}
+        >
           <span className="marquee-text">
             ✦&nbsp;&nbsp;RENAISSANCE VAN WITHELMIND &nbsp;•&nbsp; PROGENY &nbsp;•&nbsp;
             CRIMSON UPLINK ACTIVE &nbsp;•&nbsp; ALL INITIATES REPORT TO YOUR SIRE &nbsp;•&nbsp;
@@ -31,44 +36,52 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
         </p>
       </div>
 
-      {/* Main header bar */}
+      {/* ── Main header bar ────────────────────────────── */}
+      {/* Uses a CSS grid: [auth-placeholder] [center-title] [auth-actual]
+          so the title stays perfectly centered regardless of auth state     */}
       <div
-        className="panel flex items-center justify-between px-6 py-4"
-        style={{ borderRadius: 0, border: 'none' }}
+        className="panel grid px-6 py-5"
+        style={{
+          borderRadius: 0,
+          border: 'none',
+          gridTemplateColumns: '1fr auto 1fr',
+          alignItems: 'center',
+        }}
       >
-        {/* Left ornament */}
-        <div className="hidden md:flex items-center gap-3 text-[var(--gold-dim)] font-mono text-xs tracking-[0.3em] uppercase select-none">
-          <span className="text-[var(--blood-light)] text-lg">⸸</span>
-          <span>Est. in the Dark</span>
-        </div>
+        {/* Col 1 — invisible spacer that mirrors col 3 width */}
+        <div />
 
-        {/* Center — clan name */}
-        <div className="text-center flex-1">
+        {/* Col 2 — clan name, always centered */}
+        <div className="text-center">
           <h1
-            className="font-display text-xl md:text-3xl tracking-widest uppercase select-none"
+            className="font-display text-2xl md:text-4xl uppercase select-none"
             style={{
               color: 'var(--pale)',
               textShadow: 'var(--glow-blood)',
-              letterSpacing: '0.15em',
+              letterSpacing: '0.12em',
             }}
           >
             Renaissance Van Withelmind
           </h1>
           <p
-            className="font-title text-[10px] md:text-xs tracking-[0.5em] uppercase mt-0.5"
-            style={{ color: 'var(--gold)', opacity: 0.8 }}
+            className="font-title text-xs md:text-sm tracking-[0.45em] uppercase mt-1 font-bold"
+            style={{
+              color: 'var(--gold)',
+              opacity: 1,
+              textShadow: '0 0 10px rgba(201,168,76,0.6)',
+            }}
           >
             Progeny &nbsp;✦&nbsp; Clan Calendar
           </p>
         </div>
 
-        {/* Right — auth */}
-        <div className="flex items-center gap-3">
+        {/* Col 3 — auth (right-aligned) */}
+        <div className="flex items-center justify-end gap-3">
           {profile ? (
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <p className="font-title text-xs text-[var(--pale)] tracking-wide">
-                  {CLAN_ROLES[profile.role] ?? '◈'}&nbsp; {profile.username}
+                  {CLAN_ROLES[profile.role] ?? '◈'}&nbsp;{profile.username}
                 </p>
                 <p className="font-mono text-[10px] text-[var(--pale-dim)] tracking-widest uppercase">
                   {profile.role}{profile.is_admin ? ' · Admin' : ''}
