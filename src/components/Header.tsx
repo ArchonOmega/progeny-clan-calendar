@@ -14,6 +14,7 @@ const CLAN_ROLES: Record<string, string> = {
   Trainer:      '⚔',
   Member:       '◈',
   'Queens Hand': '♚',
+  Liaison:      '⚜',
 }
 
 export default function Header({ profile, onLoginClick }: HeaderProps) {
@@ -37,8 +38,6 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
       </div>
 
       {/* ── Main header bar ────────────────────────────── */}
-      {/* Uses a CSS grid: [auth-placeholder] [center-title] [auth-actual]
-          so the title stays perfectly centered regardless of auth state     */}
       <div
         className="panel grid px-6 py-5"
         style={{
@@ -48,8 +47,20 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
           alignItems: 'center',
         }}
       >
-        {/* Col 1 — invisible spacer that mirrors col 3 width */}
-        <div />
+        {/* Col 1 — logged-in user info (left side) */}
+        <div className="flex items-center gap-2">
+          {profile && (
+            <div>
+              <p className="font-title text-sm text-[var(--pale)] tracking-wide">
+                {CLAN_ROLES[profile.role] ?? '◈'}&nbsp;{profile.username}
+              </p>
+              <p className="font-mono text-[10px] text-[var(--gold)] tracking-widest uppercase"
+                style={{ textShadow: '0 0 8px rgba(201,168,76,0.5)' }}>
+                {profile.role}{profile.is_admin ? ' · Admin' : ''}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Col 2 — clan name, always centered */}
         <div className="text-center">
@@ -67,7 +78,6 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
             className="font-title text-xs md:text-sm tracking-[0.45em] uppercase mt-1 font-bold"
             style={{
               color: 'var(--gold)',
-              opacity: 1,
               textShadow: '0 0 10px rgba(201,168,76,0.6)',
             }}
           >
@@ -75,24 +85,14 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
           </p>
         </div>
 
-        {/* Col 3 — auth (right-aligned) */}
+        {/* Col 3 — login/logout (right side) */}
         <div className="flex items-center justify-end gap-3">
           {profile ? (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="font-title text-xs text-[var(--pale)] tracking-wide">
-                  {CLAN_ROLES[profile.role] ?? '◈'}&nbsp;{profile.username}
-                </p>
-                <p className="font-mono text-[10px] text-[var(--pale-dim)] tracking-widest uppercase">
-                  {profile.role}{profile.is_admin ? ' · Admin' : ''}
-                </p>
-              </div>
-              <form action={signOut}>
-                <button type="submit" className="btn-ghost text-[10px] py-1 px-3">
-                  Sign Out
-                </button>
-              </form>
-            </div>
+            <form action={signOut}>
+              <button type="submit" className="btn-ghost text-[10px] py-1 px-3">
+                Sign Out
+              </button>
+            </form>
           ) : (
             <button onClick={onLoginClick} className="btn-blood">
               Staff Login
