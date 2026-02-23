@@ -63,7 +63,7 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
         </div>
 
         {/* Right — auth */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="flex items-center gap-3">
           {profile ? (
             <div className="flex items-center gap-3">
               <div className="text-right">

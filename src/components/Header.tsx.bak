@@ -22,10 +22,10 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
       <div className="overflow-hidden bg-[var(--blood)] py-1 border-b border-[var(--blood-light)]">
         <p className="font-mono text-[10px] text-red-200 tracking-widest">
           <span className="marquee-text">
-            ✦&nbsp;&nbsp;PROGENY VAMPIRE CLAN &nbsp;•&nbsp; SECOND LIFE &nbsp;•&nbsp;
-            BLOOD COVENANT ACTIVE &nbsp;•&nbsp; ALL INITIATES REPORT TO YOUR SIRE &nbsp;•&nbsp;
-            THE NIGHT IS ETERNAL &nbsp;•&nbsp; ✦&nbsp;&nbsp;PROGENY VAMPIRE CLAN &nbsp;•&nbsp;
-            SECOND LIFE &nbsp;•&nbsp; BLOOD COVENANT ACTIVE &nbsp;•&nbsp;
+            ✦&nbsp;&nbsp;RENAISSANCE VAN WITHELMIND &nbsp;•&nbsp; PROGENY &nbsp;•&nbsp;
+            CRIMSON UPLINK ACTIVE &nbsp;•&nbsp; ALL INITIATES REPORT TO YOUR SIRE &nbsp;•&nbsp;
+            THE NIGHT IS ETERNAL &nbsp;•&nbsp; ✦&nbsp;&nbsp;RENAISSANCE VAN WITHELMIND &nbsp;•&nbsp;
+            PROGENY &nbsp;•&nbsp; CRIMSON UPLINK ACTIVE &nbsp;•&nbsp;
             ALL INITIATES REPORT TO YOUR SIRE &nbsp;•&nbsp; THE NIGHT IS ETERNAL &nbsp;•&nbsp;
           </span>
         </p>
@@ -52,13 +52,13 @@ export default function Header({ profile, onLoginClick }: HeaderProps) {
               letterSpacing: '0.15em',
             }}
           >
-            Progeny
+            Renaissance Van Withelmind
           </h1>
           <p
             className="font-title text-[10px] md:text-xs tracking-[0.5em] uppercase mt-0.5"
             style={{ color: 'var(--gold)', opacity: 0.8 }}
           >
-            Vampire Clan &nbsp;✦&nbsp; Clan Calendar
+            Progeny &nbsp;✦&nbsp; Clan Calendar
           </p>
         </div>
 
